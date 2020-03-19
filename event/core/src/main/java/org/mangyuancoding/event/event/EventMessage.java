@@ -1,4 +1,4 @@
-package org.mangyuancoding.eventsourcing.event;
+package org.mangyuancoding.event.event;
 
 
 import org.mangyuancoding.constitution.message.Message;

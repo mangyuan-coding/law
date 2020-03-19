@@ -1,0 +1,27 @@
+{
+  "groups": [
+    {
+      "name": "event-server",
+      "type": "org.mangyuancoding.event.config.properties.EventServerProperties",
+      "sourceType": "org.mangyuancoding.event.config.spring.AutoConfig",
+      "sourceMethod": "eventServerProperties()"
+    }
+  ],
+  "properties": [
+    {
+      "name": "event-server.exchange",
+      "type": "java.lang.String",
+      "description": "交换机",
+      "sourceType": "org.mangyuancoding.event.config.properties.EventServerProperties",
+      "defaultValue": "event-server"
+    },
+    {
+      "name": "event-server.routing-key",
+      "type": "java.lang.String",
+      "description": "消息上的路由key",
+      "sourceType": "org.mangyuancoding.event.config.properties.EventServerProperties",
+      "defaultValue": "#"
+    }
+  ],
+  "hints": []
+}

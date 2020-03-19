@@ -1,9 +1,10 @@
-package org.mangyuancoding.eventsourcing;
+package org.mangyuancoding.event.publish;
 
 import org.mangyuancoding.constitution.message.metadata.MetaData;
-import org.mangyuancoding.eventsourcing.event.EventMessage;
-import org.mangyuancoding.eventsourcing.event.EventMetaDataBuilder;
-import org.mangyuancoding.eventsourcing.event.GenericEventMessage;
+import org.mangyuancoding.event.support.ChannelSupplier;
+import org.mangyuancoding.event.event.EventMessage;
+import org.mangyuancoding.event.event.EventMetaDataBuilder;
+import org.mangyuancoding.event.event.GenericEventMessage;
 
 /**
  * Description

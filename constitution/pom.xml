@@ -11,5 +11,11 @@
 
     <artifactId>constitution</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>net.dreamlu</groupId>
+            <artifactId>mica-core</artifactId>
+        </dependency>
+    </dependencies>
 
 </project>

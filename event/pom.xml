@@ -17,12 +17,12 @@
         <module>core</module>
         <module>client</module>
         <module>server</module>
-        <module>boot</module>
     </modules>
 
     <properties>
         <constitution.version>1.0-SNAPSHOT</constitution.version>
         <evnet.version>1.0-SNAPSHOT</evnet.version>
+        <spring-boot.version>2.1.10.RELEASE</spring-boot.version>
     </properties>
 
     <dependencyManagement>
@@ -37,7 +37,13 @@
                 <artifactId>event-core</artifactId>
                 <version>${evnet.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
-
     </dependencyManagement>
 </project>
