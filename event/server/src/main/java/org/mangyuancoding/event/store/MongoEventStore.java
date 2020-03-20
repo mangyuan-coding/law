@@ -42,6 +42,6 @@ public class MongoEventStore implements EventStore {
         MessageProperties messageProperties = new MessageProperties();
         messageProperties.getHeaders().putAll(eventMessage.getMetaData());
 
-        amqpTemplate.send(exchange, routingKey, new Message(eventMessage.getPayloadJson().getBytes(), messageProperties));
+        amqpTemplate.send(exchange, routingKey, new Message(eventMessage.getPayloadJson(), messageProperties));
     }
 }
