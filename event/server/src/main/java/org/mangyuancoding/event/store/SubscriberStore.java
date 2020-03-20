@@ -97,7 +97,7 @@ public class SubscriberStore {
         MessageProperties messageProperties = new MessageProperties();
         messageProperties.getHeaders().putAll(mongoEventMessage.getMetaData());
 
-        amqpTemplate.send(exchange, routingKey, new Message(mongoEventMessage.getPayloadJson().getBytes(), messageProperties));
+        amqpTemplate.send(exchange, routingKey, new Message(mongoEventMessage.getPayloadJson(), messageProperties));
     }
 
     private List<MongoEventMessage> query(String eventType, Instant startTimeStamp) {
