@@ -47,6 +47,14 @@ public class AmqpChannelSupplier implements ChannelSupplier {
     }
 
     @Override
+    public void send(String exchange, String routingKey, EventMessage<?> eventMessage) {
+        MessageProperties messageProperties = new MessageProperties();
+        messageProperties.getHeaders().putAll(eventMessage.getMetaData());
+
+        amqpTemplate.send(exchange, routingKey, new Message(eventMessage.getPayload().toString().getBytes(), messageProperties));
+    }
+
+    @Override
     @RabbitListener(queues = EventServerProperties.DEFAULT_QUEUE)
     public void receive(@Payload String body, @Headers Map<String, Object> headers) {
 

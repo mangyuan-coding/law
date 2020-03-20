@@ -14,7 +14,6 @@ public interface EventStore {
      * 保存事件
      *
      * @param eventMessage 事件
-     * @param <T>          事件负载类型
      */
-    <T> void save(EventMessage<T> eventMessage);
+    void save(EventMessage<?> eventMessage);
 }

@@ -22,6 +22,15 @@ public interface ChannelSupplier {
     void send(EventMessage<?> eventMessage);
 
     /**
+     * 发送指定交换机中
+     *
+     * @param exchange     指定交换机
+     * @param routingKey   路由
+     * @param eventMessage 事件
+     */
+    void send(String exchange, String routingKey, EventMessage<?> eventMessage);
+
+    /**
      * 接受到消息
      *
      * @param body    消息体
