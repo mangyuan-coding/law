@@ -2,11 +2,13 @@ package org.mangyuancoding.event.store;
 
 import lombok.RequiredArgsConstructor;
 import net.dreamlu.mica.core.utils.$;
-import org.mangyuancoding.event.event.EventMessage;
+import org.mangyuancoding.constitution.message.metadata.MetaData;
 import org.mangyuancoding.event.model.MongoEventMessage;
 import org.mangyuancoding.event.model.Subscriber;
 import org.mangyuancoding.event.model.repository.MongoEventMessageRepository;
-import org.mangyuancoding.event.support.ChannelSupplier;
+import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageProperties;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,19 +21,27 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class MongoEventStore implements EventStore {
 
+    private final AmqpTemplate amqpTemplate;
     private final SubscriberStore subscriberStore;
-    private final ChannelSupplier channelSupplier;
     private final MongoEventMessageRepository mongoEventMessageRepository;
 
     @Override
-    public void save(EventMessage<?> eventMessage) {
-        mongoEventMessageRepository.save(new MongoEventMessage(eventMessage));
+    public void save(byte[] payload, MetaData metaData) {
+        MongoEventMessage mongoEventMessage = new MongoEventMessage(payload, metaData);
+        mongoEventMessageRepository.save(mongoEventMessage);
 
-        Iterable<Subscriber> subscribers = subscriberStore.queryByEventType(eventMessage.getPayloadType().getSimpleName());
+        Iterable<Subscriber> subscribers = subscriberStore.queryByEventType(mongoEventMessage.getPayloadType());
         if ($.isNotEmpty(subscribers)) {
             for (Subscriber subscriber : subscribers) {
-                channelSupplier.send(subscriber.getExchange(), subscriber.getRoutingKey(), eventMessage);
+                send(subscriber.getExchange(), subscriber.getRoutingKey(), mongoEventMessage);
             }
         }
+    }
+
+    private void send(String exchange, String routingKey, MongoEventMessage eventMessage) {
+        MessageProperties messageProperties = new MessageProperties();
+        messageProperties.getHeaders().putAll(eventMessage.getMetaData());
+
+        amqpTemplate.send(exchange, routingKey, new Message(eventMessage.getPayloadJson().getBytes(), messageProperties));
     }
 }

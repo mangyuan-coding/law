@@ -1,7 +1,7 @@
 package org.mangyuancoding.event.support;
 
+import org.mangyuancoding.constitution.message.metadata.MetaData;
 import org.mangyuancoding.constitution.support.Registration;
-import org.mangyuancoding.event.event.EventMessage;
 
 /**
  * Description
@@ -13,5 +13,5 @@ public interface EventListener {
 
     void collectRegistration(Registration registration);
 
-    <T> void on(EventMessage<T> eventMessage);
+    void on(byte[] payload, MetaData metaData);
 }

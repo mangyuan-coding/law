@@ -1,6 +1,6 @@
 package org.mangyuancoding.event.store;
 
-import org.mangyuancoding.event.event.EventMessage;
+import org.mangyuancoding.constitution.message.metadata.MetaData;
 
 /**
  * Description
@@ -13,7 +13,8 @@ public interface EventStore {
     /**
      * 保存事件
      *
-     * @param eventMessage 事件
+     * @param payload  负载
+     * @param metaData 元数据
      */
-    void save(EventMessage<?> eventMessage);
+    void save(byte[] payload, MetaData metaData);
 }

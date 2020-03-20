@@ -5,9 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import net.dreamlu.mica.core.utils.$;
 import org.mangyuancoding.constitution.message.metadata.MetaData;
-import org.mangyuancoding.event.event.EventMessage;
+import org.mangyuancoding.event.event.EventMessageMetaDataKeys;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
@@ -31,9 +30,9 @@ public class MongoEventMessage {
      */
     private String id;
     /**
-     * 负载内容json化
+     * 负载内容
      */
-    private String payloadJson;
+    private byte[] payloadJson;
     /**
      * 原数据json
      */
@@ -47,11 +46,11 @@ public class MongoEventMessage {
      */
     private Instant instant;
 
-    public MongoEventMessage(EventMessage<?> eventMessage) {
-        this.id = eventMessage.getIdentifier();
-        this.payloadJson = $.toJson(eventMessage.getPayload());
-        this.payloadType = eventMessage.getPayloadType().getName();
-        this.instant = eventMessage.getTimestamp();
-        this.metaData = eventMessage.getMetaData();
+    public MongoEventMessage(byte[] payload, MetaData metaData) {
+        this.id = metaData.get(EventMessageMetaDataKeys.MESSAGE_IDENTIFIER).toString();
+        this.payloadJson = payload;
+        this.payloadType = metaData.get(EventMessageMetaDataKeys.PAYLOAD_TYPE_NAME).toString();
+        this.instant = Instant.ofEpochSecond(Long.parseLong(metaData.get(EventMessageMetaDataKeys.TIMESTAMP).toString()));
+        this.metaData = metaData;
     }
 }

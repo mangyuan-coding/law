@@ -11,7 +11,7 @@ import java.util.Map;
  * Email niumangyuan@vcredit.com
  * Date 2020/3/18
  */
-public abstract class MetaDataBuilder {
+public abstract class MessageMetaDataBuilder {
 
     public static MetaData build(Message<?> message) {
         Map<String, Object> metaData = new HashMap<>();

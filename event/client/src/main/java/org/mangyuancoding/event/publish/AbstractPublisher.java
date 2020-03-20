@@ -1,9 +1,10 @@
 package org.mangyuancoding.event.publish;
 
 import org.mangyuancoding.constitution.message.metadata.MetaData;
+import org.mangyuancoding.constitution.message.metadata.MessageMetaDataBuilder;
+import org.mangyuancoding.event.event.EventMessageMetaDataBuilder;
 import org.mangyuancoding.event.support.ChannelSupplier;
 import org.mangyuancoding.event.event.EventMessage;
-import org.mangyuancoding.event.event.EventMetaDataBuilder;
 import org.mangyuancoding.event.event.GenericEventMessage;
 
 /**
@@ -24,7 +25,7 @@ public abstract class AbstractPublisher implements Publisher {
     public void publish(Object event, MetaData metaData) {
 
         EventMessage<Object> eventMessage = GenericEventMessage.asEventMessage(event);
-        MetaData defaultMetaData = EventMetaDataBuilder.build(eventMessage);
+        MetaData defaultMetaData = EventMessageMetaDataBuilder.build(eventMessage);
         if (!metaData.isEmpty()) {
             defaultMetaData.putAll(metaData);
         }

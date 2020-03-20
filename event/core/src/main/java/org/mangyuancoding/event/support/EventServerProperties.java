@@ -9,7 +9,7 @@ package org.mangyuancoding.event.support;
  */
 public class EventServerProperties {
 
-    private static final String DEFAULT_EXCHANGE = "event-server.exchange";
+    private static final String DEFAULT_EXCHANGE = "event-server";
     public static final String DEFAULT_QUEUE = "event-server.queue";
     private static final String DEFAULT_ROUTING_KEY = "#";
 

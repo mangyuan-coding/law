@@ -2,8 +2,7 @@ package org.mangyuancoding.event.support;
 
 import org.mangyuancoding.constitution.support.Registration;
 import org.mangyuancoding.event.event.EventMessage;
-
-import java.util.Map;
+import org.springframework.messaging.Message;
 
 
 /**
@@ -22,21 +21,11 @@ public interface ChannelSupplier {
     void send(EventMessage<?> eventMessage);
 
     /**
-     * 发送指定交换机中
-     *
-     * @param exchange     指定交换机
-     * @param routingKey   路由
-     * @param eventMessage 事件
-     */
-    void send(String exchange, String routingKey, EventMessage<?> eventMessage);
-
-    /**
      * 接受到消息
      *
-     * @param body    消息体
-     * @param headers 消息头
+     * @param message 消息
      */
-    void receive(String body, Map<String, Object> headers);
+    void receive(Message<byte[]> message);
 
     /**
      * 注册监听器

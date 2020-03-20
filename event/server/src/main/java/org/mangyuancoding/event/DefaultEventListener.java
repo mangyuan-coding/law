@@ -1,7 +1,7 @@
 package org.mangyuancoding.event;
 
+import org.mangyuancoding.constitution.message.metadata.MetaData;
 import org.mangyuancoding.constitution.support.Registration;
-import org.mangyuancoding.event.event.EventMessage;
 import org.mangyuancoding.event.store.EventStore;
 import org.mangyuancoding.event.support.EventListener;
 
@@ -37,7 +37,7 @@ public class DefaultEventListener implements EventListener {
     }
 
     @Override
-    public <T> void on(EventMessage<T> eventMessage) {
-        eventStore.save(eventMessage);
+    public void on(byte[] payload, MetaData metaData) {
+        eventStore.save(payload, metaData);
     }
 }

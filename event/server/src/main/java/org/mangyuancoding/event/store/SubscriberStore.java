@@ -2,23 +2,21 @@ package org.mangyuancoding.event.store;
 
 import lombok.RequiredArgsConstructor;
 import net.dreamlu.mica.core.utils.$;
-import net.dreamlu.mica.core.utils.ClassUtil;
 import org.mangyuancoding.constitution.message.IdentifierFactory;
-import org.mangyuancoding.event.event.EventMessage;
-import org.mangyuancoding.event.event.GenericEventMessage;
 import org.mangyuancoding.event.model.MongoEventMessage;
 import org.mangyuancoding.event.model.SubscribedEvent;
 import org.mangyuancoding.event.model.Subscriber;
 import org.mangyuancoding.event.model.repository.MongoEventMessageRepository;
 import org.mangyuancoding.event.model.repository.SubscribedEventRepository;
 import org.mangyuancoding.event.model.repository.SubscriberRepository;
-import org.mangyuancoding.event.support.ChannelSupplier;
+import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageProperties;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -36,7 +34,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SubscriberStore {
 
-    private final ChannelSupplier channelSupplier;
+    private final AmqpTemplate amqpTemplate;
     private final SubscriberRepository subscriberRepository;
     private final SubscribedEventRepository subscribedEventRepository;
     private final MongoEventMessageRepository mongoEventMessageRepository;
@@ -87,15 +85,22 @@ public class SubscriberStore {
         }
 
         for (SubscribedEvent subscribedEvent : subscribedEvents) {
-            List<EventMessage<?>> eventMessages = query(subscribedEvent.getEventType(), subscribedEvent.getEventStartTime());
-            eventMessages.sort(Comparator.comparing(EventMessage::getTimestamp));
-            for (EventMessage<?> eventMessage : eventMessages) {
-                channelSupplier.send(subscriber.get().getExchange(), subscriber.get().getRoutingKey(), eventMessage);
+            List<MongoEventMessage> eventMessages = query(subscribedEvent.getEventType(), subscribedEvent.getEventStartTime());
+            eventMessages.sort(Comparator.comparing(MongoEventMessage::getInstant));
+            for (MongoEventMessage mongoEventMessage : eventMessages) {
+                send(subscriber.get().getExchange(), subscriber.get().getRoutingKey(), mongoEventMessage);
             }
         }
     }
 
-    private List<EventMessage<?>> query(String eventType, Instant startTimeStamp) {
+    private void send(String exchange, String routingKey, MongoEventMessage mongoEventMessage) {
+        MessageProperties messageProperties = new MessageProperties();
+        messageProperties.getHeaders().putAll(mongoEventMessage.getMetaData());
+
+        amqpTemplate.send(exchange, routingKey, new Message(mongoEventMessage.getPayloadJson().getBytes(), messageProperties));
+    }
+
+    private List<MongoEventMessage> query(String eventType, Instant startTimeStamp) {
 
         List<MongoEventMessage> mongoEventMessages =
                 mongoEventMessageRepository.findAllByPayloadTypeEqualsAndInstantAfter(eventType, startTimeStamp);
@@ -103,18 +108,6 @@ public class SubscriberStore {
         if ($.isEmpty(mongoEventMessages)) {
             return Collections.emptyList();
         }
-
-        List<EventMessage<?>> eventMessages = new ArrayList<>(mongoEventMessages.size());
-        for (MongoEventMessage mongoEventMessage : mongoEventMessages) {
-            try {
-                eventMessages.add(new GenericEventMessage<>(
-                        $.readJson(mongoEventMessage.getPayloadJson(),
-                                ClassUtil.forName(mongoEventMessage.getPayloadType(), ClassLoader.getSystemClassLoader())),
-                        mongoEventMessage.getMetaData()));
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
-        return eventMessages;
+        return mongoEventMessages;
     }
 }

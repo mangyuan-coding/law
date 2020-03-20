@@ -10,5 +10,5 @@ import org.mangyuancoding.constitution.message.metadata.MessageMetaDataKeys;
  */
 public class EventMessageMetaDataKeys extends MessageMetaDataKeys {
 
-    public static final String EVENT_NAME = "event-name";
+    public static final String TIMESTAMP = "event-message-timestamp";
 }
