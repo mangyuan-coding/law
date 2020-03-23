@@ -31,10 +31,12 @@ public class SubscribeEventRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
 
-        String response = restTemplate.postForObject(eventProperties.getServer().buildRegisterUrl(),
-                eventProperties.getClient().buildRegisterParam(applicationContext.getApplicationName()), String.class);
-
-        log.debug(response);
+        if (eventProperties.getClient().isSubscribe()) {
+            String response = restTemplate.postForObject(eventProperties.getServer().buildRegisterUrl(),
+                    eventProperties.getClient().buildRegisterParam(applicationContext.getApplicationName()),
+                    String.class);
+            log.debug("订阅服务消息成功：" + response);
+        }
     }
 
 }

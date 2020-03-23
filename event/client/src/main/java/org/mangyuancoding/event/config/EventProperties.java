@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import net.dreamlu.mica.core.utils.$;
 import org.mangyuancoding.event.support.AmqpChannelConstants;
 
 import java.util.HashSet;
@@ -56,6 +57,10 @@ public class EventProperties {
     @AllArgsConstructor
     public static class Client {
         /**
+         * 是否订阅消息
+         */
+        private boolean subscribe = false;
+        /**
          * 监听的消息发送的交换机
          */
         private String subscribedEventExchange;
@@ -73,11 +78,17 @@ public class EventProperties {
         private Map<String, Subscribe> subscribes;
 
         public RegisterParam buildRegisterParam(String applicationName) {
+            if ($.isEmpty(subscribedEventExchange)) {
+                throw new IllegalArgumentException("订阅开启的时候，请填写接受的exchange");
+            }
             RegisterParam registerParam = new RegisterParam();
             registerParam.setName(applicationName);
             registerParam.setExchange(subscribedEventExchange);
             registerParam.setRoutingKey(eventRoutingKey);
 
+            if ($.isEmpty(this.subscribes)) {
+                throw new IllegalArgumentException("请填写要订阅的事件类型");
+            }
             Set<RegisterParam.Event> events = new HashSet<>();
             for (Subscribe subscribe : this.subscribes.values()) {
                 events.add(new RegisterParam.Event(subscribe));

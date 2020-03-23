@@ -54,24 +54,41 @@ public class SubscriberServiceImpl implements SubscriberService {
     @Override
     public String store(Subscriber subscriber, List<SubscribedEvent> subscribedEvents) {
 
-        String subscriberId = IdentifierFactory.getInstance().generateIdentifier();
+        Subscriber existingSubscriber = subscriberRepository.findByName(subscriber.getName());
 
-        subscriber.setId(subscriberId);
-        subscriberRepository.save(subscriber);
+        String subscriberId;
+        if (existingSubscriber != null) {
+            subscriberId = existingSubscriber.getId();
 
-        if ($.isNotEmpty(subscribedEvents)) {
-            subscribedEvents.forEach(subscribedEvent -> subscribedEvent.setSubscriberId(subscriberId));
+            List<SubscribedEvent> existingSubscribedEvents = subscribedEventRepository.findAllBySubscriberId(subscriberId);
+
+            if ($.isNotEmpty(existingSubscribedEvents)) {
+                Set<String> existingType = existingSubscribedEvents.stream().map(SubscribedEvent::getEventType).collect(Collectors.toSet());
+                subscribedEvents.removeIf(e -> existingType.contains(e.getEventType()));
+                if ($.isNotEmpty(subscribedEvents) && subscribedEvents.size() > 0) {
+                    subscribedEvents.forEach(subscribedEvent -> subscribedEvent.setSubscriberId(subscriberId));
+                    subscribedEventRepository.saveAll(subscribedEvents);
+                }
+            } else {
+                subscribedEvents.forEach(subscribedEvent -> subscribedEvent.setSubscriberId(subscriberId));
+                subscribedEventRepository.saveAll(subscribedEvents);
+            }
+        } else {
+            subscriberId = IdentifierFactory.getInstance().generateIdentifier();
+            subscriber.setId(subscriberId);
+            subscriberRepository.save(subscriber);
+
+            if ($.isNotEmpty(subscribedEvents)) {
+                subscribedEvents.forEach(subscribedEvent -> subscribedEvent.setSubscriberId(subscriberId));
+                subscribedEventRepository.saveAll(subscribedEvents);
+            }
         }
-
-        subscribedEventRepository.saveAll(subscribedEvents);
 
         return subscriberId;
     }
 
     @Async
     public void sendEvent2NewSubscriber(String subscriberId) {
-
-        System.out.print(this.getClass().getName() + ":" + Thread.currentThread().getName());
 
         Optional<Subscriber> subscriber = subscriberRepository.findById(subscriberId);
         if (subscriber.isEmpty()) {

@@ -41,8 +41,6 @@ public class SubscribeController {
         String subscriberId = subscriberService.store(param.build(), param.buildSubscribedEvent());
         subscriberService.sendEvent2NewSubscriber(subscriberId);
 
-        System.out.print(this.getClass().getName() + ":" + Thread.currentThread().getName());
-
         return Mono.just(R.success());
     }
 
