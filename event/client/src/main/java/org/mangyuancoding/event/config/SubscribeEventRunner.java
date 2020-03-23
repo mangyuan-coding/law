@@ -3,7 +3,6 @@ package org.mangyuancoding.event.config;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.client.RestTemplate;
 
@@ -18,13 +17,10 @@ import org.springframework.web.client.RestTemplate;
 public class SubscribeEventRunner implements ApplicationRunner {
 
     private EventProperties eventProperties;
-    private ApplicationContext applicationContext;
     private RestTemplate restTemplate;
 
-    public SubscribeEventRunner(EventProperties eventProperties, ApplicationContext applicationContext,
-                                RestTemplate restTemplate) {
+    public SubscribeEventRunner(EventProperties eventProperties, RestTemplate restTemplate) {
         this.eventProperties = eventProperties;
-        this.applicationContext = applicationContext;
         this.restTemplate = restTemplate;
     }
 
@@ -33,7 +29,7 @@ public class SubscribeEventRunner implements ApplicationRunner {
 
         if (eventProperties.getClient().isSubscribe()) {
             String response = restTemplate.postForObject(eventProperties.getServer().buildRegisterUrl(),
-                    eventProperties.getClient().buildRegisterParam(applicationContext.getApplicationName()),
+                    eventProperties.getClient().buildRegisterParam(),
                     String.class);
             log.debug("订阅服务消息成功：" + response);
         }

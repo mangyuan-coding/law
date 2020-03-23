@@ -61,30 +61,19 @@ public class EventProperties {
          */
         private boolean subscribe = false;
         /**
-         * 监听的消息发送的交换机
+         * 订阅者的名字
          */
-        private String subscribedEventExchange;
-        /**
-         * 监听的消息交换机对应的队列
-         */
-        private String subscribedEventQueue;
-        /**
-         * 消息的路由方式
-         */
-        private String eventRoutingKey;
+        private String subscribeName;
         /**
          * 要监听的消息
          */
         private Map<String, Subscribe> subscribes;
 
-        public RegisterParam buildRegisterParam(String applicationName) {
-            if ($.isEmpty(subscribedEventExchange)) {
-                throw new IllegalArgumentException("订阅开启的时候，请填写接受的exchange");
-            }
+        public RegisterParam buildRegisterParam() {
             RegisterParam registerParam = new RegisterParam();
-            registerParam.setName(applicationName);
-            registerParam.setExchange(subscribedEventExchange);
-            registerParam.setRoutingKey(eventRoutingKey);
+            registerParam.setName(subscribeName);
+            registerParam.setExchange(subscribeName + AmqpChannelConstants.CLIENT_RECEIVE_EXCHANGE);
+            registerParam.setRoutingKey(AmqpChannelConstants.CLIENT_RECEIVE_ROUTING_KEY);
 
             if ($.isEmpty(this.subscribes)) {
                 throw new IllegalArgumentException("请填写要订阅的事件类型");
