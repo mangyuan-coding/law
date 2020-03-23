@@ -1,26 +1,58 @@
 {
   "groups": [
     {
-      "name": "event-server",
-      "type": "org.mangyuancoding.event.config.properties.EventServerProperties",
-      "sourceType": "org.mangyuancoding.event.config.spring.AutoConfig",
-      "sourceMethod": "eventServerProperties()"
+      "name": "event",
+      "type": "org.mangyuancoding.event.config.EventProperties",
+      "sourceType": "org.mangyuancoding.event.config.EventClientConfig",
+      "sourceMethod": "eventProperties()"
+    },
+    {
+      "name": "event.client",
+      "type": "org.mangyuancoding.event.config.EventProperties$Client",
+      "sourceType": "org.mangyuancoding.event.config.EventProperties"
+    },
+    {
+      "name": "event.server",
+      "type": "org.mangyuancoding.event.config.EventProperties$Server",
+      "sourceType": "org.mangyuancoding.event.config.EventProperties"
     }
   ],
   "properties": [
     {
-      "name": "event-server.exchange",
+      "name": "event.client.event-routing-key",
       "type": "java.lang.String",
-      "description": "交换机",
-      "sourceType": "org.mangyuancoding.event.config.properties.EventServerProperties",
-      "defaultValue": "event-server"
+      "description": "消息的路由方式",
+      "sourceType": "org.mangyuancoding.event.config.EventProperties$Client"
     },
     {
-      "name": "event-server.routing-key",
+      "name": "event.client.subscribed-event-exchange",
       "type": "java.lang.String",
-      "description": "消息上的路由key",
-      "sourceType": "org.mangyuancoding.event.config.properties.EventServerProperties",
-      "defaultValue": "#"
+      "description": "监听的消息发送的交换机",
+      "sourceType": "org.mangyuancoding.event.config.EventProperties$Client"
+    },
+    {
+      "name": "event.client.subscribed-event-queue",
+      "type": "java.lang.String",
+      "description": "监听的消息交换机对应的队列",
+      "sourceType": "org.mangyuancoding.event.config.EventProperties$Client"
+    },
+    {
+      "name": "event.client.subscribes",
+      "type": "java.util.Map<java.lang.String,org.mangyuancoding.event.config.EventProperties$Client$Subscribe>",
+      "description": "要监听的消息",
+      "sourceType": "org.mangyuancoding.event.config.EventProperties$Client"
+    },
+    {
+      "name": "event.server.host",
+      "type": "java.lang.String",
+      "description": "服务端地址",
+      "sourceType": "org.mangyuancoding.event.config.EventProperties$Server"
+    },
+    {
+      "name": "event.server.port",
+      "type": "java.lang.Long",
+      "description": "服务端端口号",
+      "sourceType": "org.mangyuancoding.event.config.EventProperties$Server"
     }
   ],
   "hints": []
