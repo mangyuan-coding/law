@@ -1,20 +1,20 @@
-package org.mangyuancoding.event.store;
+package org.mangyuancoding.event.subscribe.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import net.dreamlu.mica.core.utils.$;
 import org.mangyuancoding.constitution.message.IdentifierFactory;
-import org.mangyuancoding.event.model.MongoEventMessage;
-import org.mangyuancoding.event.model.SubscribedEvent;
-import org.mangyuancoding.event.model.Subscriber;
-import org.mangyuancoding.event.model.repository.MongoEventMessageRepository;
-import org.mangyuancoding.event.model.repository.SubscribedEventRepository;
-import org.mangyuancoding.event.model.repository.SubscriberRepository;
+import org.mangyuancoding.event.subscribe.model.MongoEventMessage;
+import org.mangyuancoding.event.subscribe.model.SubscribedEvent;
+import org.mangyuancoding.event.subscribe.model.Subscriber;
+import org.mangyuancoding.event.subscribe.model.repository.MongoEventMessageRepository;
+import org.mangyuancoding.event.subscribe.model.repository.SubscribedEventRepository;
+import org.mangyuancoding.event.subscribe.model.repository.SubscriberRepository;
+import org.mangyuancoding.event.subscribe.service.SubscriberService;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
-import org.springframework.aop.framework.AopContext;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -30,15 +30,16 @@ import java.util.stream.Collectors;
  * Email niumangyuan@vcredit.com
  * Date 2020/3/20
  */
-@Component
+@Service
 @RequiredArgsConstructor
-public class SubscriberStore {
+public class SubscriberServiceImpl implements SubscriberService {
 
     private final AmqpTemplate amqpTemplate;
     private final SubscriberRepository subscriberRepository;
     private final SubscribedEventRepository subscribedEventRepository;
     private final MongoEventMessageRepository mongoEventMessageRepository;
 
+    @Override
     public Iterable<Subscriber> queryByEventType(String eventType) {
         List<SubscribedEvent> subscribedEvents = subscribedEventRepository.findAllByEventType(eventType);
 
@@ -50,8 +51,8 @@ public class SubscriberStore {
         return subscriberRepository.findAllById(subscriberIds);
     }
 
-
-    public void store(Subscriber subscriber, List<SubscribedEvent> subscribedEvents) {
+    @Override
+    public String store(Subscriber subscriber, List<SubscribedEvent> subscribedEvents) {
 
         String subscriberId = IdentifierFactory.getInstance().generateIdentifier();
 
@@ -64,16 +65,14 @@ public class SubscriberStore {
 
         subscribedEventRepository.saveAll(subscribedEvents);
 
-        ((SubscriberStore) AopContext.currentProxy()).sendEvent2NewSubscriber(subscriberId);
+        return subscriberId;
     }
 
-    /**
-     * 为新订阅者发送历史消息
-     *
-     * @param subscriberId 订阅者
-     */
     @Async
     public void sendEvent2NewSubscriber(String subscriberId) {
+
+        System.out.print(this.getClass().getName() + ":" + Thread.currentThread().getName());
+
         Optional<Subscriber> subscriber = subscriberRepository.findById(subscriberId);
         if (subscriber.isEmpty()) {
             return;

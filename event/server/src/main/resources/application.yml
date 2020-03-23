@@ -1,0 +1,11 @@
+spring:
+  data:
+    # mongo
+    mongodb:
+      uri: mongodb://vcp:vcp@10.139.60.181:27017,10.139.60.183:27017,10.139.60.185:27017/vcp?authSource=admin
+  # rabbit-mq
+  rabbitmq:
+    addresses: 10.138.61.184:5672,10.138.61.185:5672,10.138.61.186:5672
+    username: admin
+    password: admin
+    virtual-host: vcp-dev

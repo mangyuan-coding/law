@@ -3,9 +3,10 @@ package org.mangyuancoding.event.store;
 import lombok.RequiredArgsConstructor;
 import net.dreamlu.mica.core.utils.$;
 import org.mangyuancoding.constitution.message.metadata.MetaData;
-import org.mangyuancoding.event.model.MongoEventMessage;
-import org.mangyuancoding.event.model.Subscriber;
-import org.mangyuancoding.event.model.repository.MongoEventMessageRepository;
+import org.mangyuancoding.event.subscribe.model.MongoEventMessage;
+import org.mangyuancoding.event.subscribe.model.Subscriber;
+import org.mangyuancoding.event.subscribe.model.repository.MongoEventMessageRepository;
+import org.mangyuancoding.event.subscribe.service.SubscriberService;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
@@ -22,7 +23,7 @@ import org.springframework.stereotype.Component;
 public class MongoEventStore implements EventStore {
 
     private final AmqpTemplate amqpTemplate;
-    private final SubscriberStore subscriberStore;
+    private final SubscriberService subscriberService;
     private final MongoEventMessageRepository mongoEventMessageRepository;
 
     @Override
@@ -30,7 +31,7 @@ public class MongoEventStore implements EventStore {
         MongoEventMessage mongoEventMessage = new MongoEventMessage(payload, metaData);
         mongoEventMessageRepository.save(mongoEventMessage);
 
-        Iterable<Subscriber> subscribers = subscriberStore.queryByEventType(mongoEventMessage.getPayloadType());
+        Iterable<Subscriber> subscribers = subscriberService.queryByEventType(mongoEventMessage.getPayloadType());
         if ($.isNotEmpty(subscribers)) {
             for (Subscriber subscriber : subscribers) {
                 send(subscriber.getExchange(), subscriber.getRoutingKey(), mongoEventMessage);

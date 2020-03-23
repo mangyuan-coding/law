@@ -1,4 +1,4 @@
-package org.mangyuancoding.event.controller;
+package org.mangyuancoding.event.subscribe.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,9 +7,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.dreamlu.mica.core.result.R;
 import net.dreamlu.mica.core.utils.$;
-import org.mangyuancoding.event.model.SubscribedEvent;
-import org.mangyuancoding.event.model.Subscriber;
-import org.mangyuancoding.event.store.SubscriberStore;
+import org.mangyuancoding.event.subscribe.model.SubscribedEvent;
+import org.mangyuancoding.event.subscribe.model.Subscriber;
+import org.mangyuancoding.event.subscribe.service.SubscriberService;
 import org.mangyuancoding.event.support.AmqpChannelConstants;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +20,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -32,12 +33,15 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class SubscribeController {
 
-    private final SubscriberStore subscriberStore;
+    private final SubscriberService subscriberService;
 
     @PostMapping(AmqpChannelConstants.SUBSCRIBE_URL)
     public Mono<R<?>> subscribe(@RequestBody RegisterParam param) {
 
-        subscriberStore.store(param.build(), param.buildSubscribedEvent());
+        String subscriberId = subscriberService.store(param.build(), param.buildSubscribedEvent());
+        subscriberService.sendEvent2NewSubscriber(subscriberId);
+
+        System.out.print(this.getClass().getName() + ":" + Thread.currentThread().getName());
 
         return Mono.just(R.success());
     }
@@ -83,6 +87,19 @@ public class SubscribeController {
             private String eventType;
 
             private Long eventStartTime;
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                Event event = (Event) o;
+                return Objects.equals(eventType, event.eventType);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(eventType);
+            }
         }
     }
 }

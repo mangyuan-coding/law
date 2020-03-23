@@ -7,8 +7,13 @@ import org.mangyuancoding.event.support.ChannelSupplier;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
+import org.springframework.web.client.RestTemplate;
+
+import javax.annotation.Resource;
 
 /**
  * Description
@@ -18,6 +23,22 @@ import org.springframework.core.annotation.Order;
  * Date 2020/3/19
  */
 public class EventClientConfig {
+
+    @Resource
+    private RestTemplate restTemplate;
+    @Resource
+    private ApplicationContext applicationContext;
+
+    @Bean
+    @ConfigurationProperties("event")
+    public EventProperties eventProperties() {
+        return new EventProperties();
+    }
+
+    @Bean
+    public SubscribeEventRunner subscribeEventRunner(EventProperties eventProperties) {
+        return new SubscribeEventRunner(eventProperties, applicationContext, restTemplate);
+    }
 
     @Bean
     public ChannelSupplier channelSupplier(AmqpTemplate amqpTemplate) {

@@ -1,4 +1,4 @@
-package org.mangyuancoding.event.model;
+package org.mangyuancoding.event.subscribe.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,6 +10,7 @@ import org.mangyuancoding.event.event.EventMessageMetaDataKeys;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
+import java.util.Map;
 
 /**
  * Description
@@ -36,7 +37,7 @@ public class MongoEventMessage {
     /**
      * 原数据json
      */
-    private MetaData metaData;
+    private Map<String, Object> metaData;
     /**
      * 负载类型
      */

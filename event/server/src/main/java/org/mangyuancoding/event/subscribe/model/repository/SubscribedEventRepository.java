@@ -1,6 +1,6 @@
-package org.mangyuancoding.event.model.repository;
+package org.mangyuancoding.event.subscribe.model.repository;
 
-import org.mangyuancoding.event.model.SubscribedEvent;
+import org.mangyuancoding.event.subscribe.model.SubscribedEvent;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;

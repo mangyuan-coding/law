@@ -1,4 +1,4 @@
-package org.mangyuancoding.event;
+package org.mangyuancoding.event.listener;
 
 import org.mangyuancoding.constitution.message.metadata.MetaData;
 import org.mangyuancoding.constitution.support.Registration;
