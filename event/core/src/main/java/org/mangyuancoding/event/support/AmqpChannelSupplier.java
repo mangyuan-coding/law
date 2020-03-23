@@ -22,12 +22,10 @@ import java.util.Objects;
 public class AmqpChannelSupplier implements ChannelSupplier {
 
     private AmqpTemplate amqpTemplate;
-    private EventServerProperties eventServerProperties;
     private List<EventListener> eventListeners = new ArrayList<>();
 
-    public AmqpChannelSupplier(AmqpTemplate amqpTemplate, EventServerProperties eventServerProperties) {
+    public AmqpChannelSupplier(AmqpTemplate amqpTemplate) {
         this.amqpTemplate = amqpTemplate;
-        this.eventServerProperties = eventServerProperties;
     }
 
     @Override
@@ -36,7 +34,7 @@ public class AmqpChannelSupplier implements ChannelSupplier {
         MessageProperties messageProperties = new MessageProperties();
         messageProperties.getHeaders().putAll(eventMessage.getMetaData());
 
-        amqpTemplate.send(eventServerProperties.getExchange(), eventServerProperties.getRoutingKey(),
+        amqpTemplate.send(AmqpChannelConstants.SERVER_RECEIVE_EXCHANGE, AmqpChannelConstants.SERVER_RECEIVE_ROUTING_KEY,
                 new Message(Objects.requireNonNull($.toJson(eventMessage.getPayload())).getBytes(),
                         messageProperties));
     }

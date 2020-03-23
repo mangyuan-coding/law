@@ -10,6 +10,7 @@ import net.dreamlu.mica.core.utils.$;
 import org.mangyuancoding.event.model.SubscribedEvent;
 import org.mangyuancoding.event.model.Subscriber;
 import org.mangyuancoding.event.store.SubscriberStore;
+import org.mangyuancoding.event.support.AmqpChannelConstants;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,7 +34,7 @@ public class SubscribeController {
 
     private final SubscriberStore subscriberStore;
 
-    @PostMapping("subscribe")
+    @PostMapping(AmqpChannelConstants.SUBSCRIBE_URL)
     public Mono<R<?>> subscribe(@RequestBody RegisterParam param) {
 
         subscriberStore.store(param.build(), param.buildSubscribedEvent());

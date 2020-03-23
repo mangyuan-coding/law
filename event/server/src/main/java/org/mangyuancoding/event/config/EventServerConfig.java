@@ -4,10 +4,8 @@ import org.mangyuancoding.event.DefaultEventListener;
 import org.mangyuancoding.event.store.EventStore;
 import org.mangyuancoding.event.support.AmqpChannelSupplier;
 import org.mangyuancoding.event.support.ChannelSupplier;
-import org.mangyuancoding.event.support.EventServerProperties;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -33,18 +31,12 @@ public class EventServerConfig {
     }
 
     @Bean
-    @ConditionalOnBean({AmqpTemplate.class, EventServerProperties.class, DefaultEventListener.class})
-    public ChannelSupplier amqpChannelSupplier(EventServerProperties eventServerProperties, List<DefaultEventListener> eventListeners) {
-        AmqpChannelSupplier amqpChannelSupplier = new AmqpChannelSupplier(amqpTemplate, eventServerProperties);
+    @ConditionalOnBean({AmqpTemplate.class, DefaultEventListener.class})
+    public ChannelSupplier amqpChannelSupplier(List<DefaultEventListener> eventListeners) {
+        AmqpChannelSupplier amqpChannelSupplier = new AmqpChannelSupplier(amqpTemplate);
         for (DefaultEventListener eventListener : eventListeners) {
             eventListener.collectRegistration(amqpChannelSupplier.register(eventListener));
         }
         return amqpChannelSupplier;
-    }
-
-    @Bean
-    @ConfigurationProperties(prefix = "event-server")
-    public EventServerProperties eventServerProperties() {
-        return new EventServerProperties();
     }
 }
