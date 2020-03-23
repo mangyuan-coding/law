@@ -17,10 +17,13 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -52,10 +55,11 @@ public class SubscriberServiceImpl implements SubscriberService {
     }
 
     @Override
-    public String store(Subscriber subscriber, List<SubscribedEvent> subscribedEvents) {
+    public List<String> store(Subscriber subscriber, List<SubscribedEvent> subscribedEvents) {
 
         Subscriber existingSubscriber = subscriberRepository.findByName(subscriber.getName());
 
+        List<String> sendEventIds = new ArrayList<>();
         String subscriberId;
         if (existingSubscriber != null) {
             subscriberId = existingSubscriber.getId();
@@ -66,11 +70,19 @@ public class SubscriberServiceImpl implements SubscriberService {
                 Set<String> existingType = existingSubscribedEvents.stream().map(SubscribedEvent::getEventType).collect(Collectors.toSet());
                 subscribedEvents.removeIf(e -> existingType.contains(e.getEventType()));
                 if ($.isNotEmpty(subscribedEvents) && subscribedEvents.size() > 0) {
-                    subscribedEvents.forEach(subscribedEvent -> subscribedEvent.setSubscriberId(subscriberId));
+                    subscribedEvents.forEach(subscribedEvent -> {
+                        subscribedEvent.setSubscriberId(subscriberId);
+                        subscribedEvent.setId(IdentifierFactory.getInstance().generateIdentifier());
+                        sendEventIds.add(subscribedEvent.getId());
+                    });
                     subscribedEventRepository.saveAll(subscribedEvents);
                 }
             } else {
-                subscribedEvents.forEach(subscribedEvent -> subscribedEvent.setSubscriberId(subscriberId));
+                subscribedEvents.forEach(subscribedEvent -> {
+                    subscribedEvent.setSubscriberId(subscriberId);
+                    subscribedEvent.setId(IdentifierFactory.getInstance().generateIdentifier());
+                    sendEventIds.add(subscribedEvent.getId());
+                });
                 subscribedEventRepository.saveAll(subscribedEvents);
             }
         } else {
@@ -79,32 +91,52 @@ public class SubscriberServiceImpl implements SubscriberService {
             subscriberRepository.save(subscriber);
 
             if ($.isNotEmpty(subscribedEvents)) {
-                subscribedEvents.forEach(subscribedEvent -> subscribedEvent.setSubscriberId(subscriberId));
+                subscribedEvents.forEach(subscribedEvent -> {
+                    subscribedEvent.setSubscriberId(subscriberId);
+                    subscribedEvent.setId(IdentifierFactory.getInstance().generateIdentifier());
+                    sendEventIds.add(subscribedEvent.getId());
+                });
                 subscribedEventRepository.saveAll(subscribedEvents);
             }
         }
 
-        return subscriberId;
+        return sendEventIds;
     }
 
     @Async
-    public void sendEvent2NewSubscriber(String subscriberId) {
+    public void sendEvent2NewSubscriber(List<String> subscribedEventIds) {
 
-        Optional<Subscriber> subscriber = subscriberRepository.findById(subscriberId);
-        if (subscriber.isEmpty()) {
-            return;
-        }
-        List<SubscribedEvent> subscribedEvents = subscribedEventRepository.findAllBySubscriberId(subscriberId);
+        Iterable<SubscribedEvent> subscribedEvents = subscribedEventRepository.findAllById(subscribedEventIds);
 
         if ($.isEmpty(subscribedEvents)) {
             return;
         }
 
+        Set<String> subscriberIds = new HashSet<>();
         for (SubscribedEvent subscribedEvent : subscribedEvents) {
+            subscriberIds.add(subscribedEvent.getSubscriberId());
+        }
+        Iterable<Subscriber> subscribers = subscriberRepository.findAllById(subscriberIds);
+        if ($.isEmpty(subscribers)) {
+            return;
+        }
+        Map<String, Subscriber> subscriberMap = new HashMap<>();
+        for (Subscriber subscriber : subscribers) {
+            subscriberMap.put(subscriber.getId(), subscriber);
+        }
+
+        for (SubscribedEvent subscribedEvent : subscribedEvents) {
+            Subscriber subscriber = subscriberMap.get(subscribedEvent.getSubscriberId());
+            if (subscriber == null) {
+                continue;
+            }
             List<MongoEventMessage> eventMessages = query(subscribedEvent.getEventType(), subscribedEvent.getEventStartTime());
+            if ($.isEmpty(eventMessages)) {
+                continue;
+            }
             eventMessages.sort(Comparator.comparing(MongoEventMessage::getInstant));
             for (MongoEventMessage mongoEventMessage : eventMessages) {
-                send(subscriber.get().getExchange(), subscriber.get().getRoutingKey(), mongoEventMessage);
+                send(subscriber.getExchange(), subscriber.getRoutingKey(), mongoEventMessage);
             }
         }
     }

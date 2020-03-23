@@ -27,12 +27,12 @@ public interface SubscriberService {
      * @param subscribedEvents 订阅的事件
      * @return subscriberId
      */
-    String store(Subscriber subscriber, List<SubscribedEvent> subscribedEvents);
+    List<String> store(Subscriber subscriber, List<SubscribedEvent> subscribedEvents);
 
     /**
      * 为新订阅者发送历史消息
      *
-     * @param subscriberId 订阅者
+     * @param subscribedEventIds 订阅者订阅的消息
      */
-    void sendEvent2NewSubscriber(String subscriberId);
+    void sendEvent2NewSubscriber(List<String> subscribedEventIds);
 }

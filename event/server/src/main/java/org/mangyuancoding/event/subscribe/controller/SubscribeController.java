@@ -38,8 +38,8 @@ public class SubscribeController {
     @PostMapping(AmqpChannelConstants.SUBSCRIBE_URL)
     public Mono<R<?>> subscribe(@RequestBody RegisterParam param) {
 
-        String subscriberId = subscriberService.store(param.build(), param.buildSubscribedEvent());
-        subscriberService.sendEvent2NewSubscriber(subscriberId);
+        List<String> subscribedEventIds = subscriberService.store(param.build(), param.buildSubscribedEvent());
+        subscriberService.sendEvent2NewSubscriber(subscribedEventIds);
 
         return Mono.just(R.success());
     }
