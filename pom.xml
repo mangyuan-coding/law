@@ -12,7 +12,7 @@
     <name>low</name>
 
     <modules>
-        <module>event</module>
+        <module>event-bus</module>
         <module>constitution</module>
     </modules>
 

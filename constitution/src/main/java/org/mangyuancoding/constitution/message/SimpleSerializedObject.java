@@ -1,7 +1,6 @@
 package org.mangyuancoding.constitution.message;
 
-
-import org.mangyuancoding.constitution.support.Assert;
+import org.springframework.util.Assert;
 
 import java.util.Objects;
 

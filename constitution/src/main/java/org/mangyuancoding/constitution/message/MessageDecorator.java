@@ -1,5 +1,6 @@
 package org.mangyuancoding.constitution.message;
 
+
 import org.mangyuancoding.constitution.message.metadata.MetaData;
 
 /**
